@@ -14,7 +14,7 @@ RSpec.describe PopuliAPI do
         subject.connect(access_key: access_key, school: school)
       end.to_not raise_error
 
-      subject.reset!
+      # subject.reset! # make it fail!
 
       expect do
         subject.connect(school: school)
