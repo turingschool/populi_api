@@ -2,7 +2,7 @@ require_relative 'lib/populi_api/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "populi_api"
-  spec.version       = PopuliApi::VERSION
+  spec.version       = PopuliAPI::VERSION
   spec.authors       = ["Tanner Welsh"]
   spec.email         = ["tanner@turing.edu"]
 

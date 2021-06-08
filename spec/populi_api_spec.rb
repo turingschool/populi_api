@@ -1,6 +1,6 @@
-RSpec.describe PopuliApi do
+RSpec.describe PopuliAPI do
   it "has a version number" do
-    expect(PopuliApi::VERSION).not_to be nil
+    expect(PopuliAPI::VERSION).not_to be nil
   end
 
   it "does something useful" do

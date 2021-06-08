@@ -1,6 +1,6 @@
 require "populi_api/version"
 
-module PopuliApi
+module PopuliAPI
   class Error < StandardError; end
   # Your code goes here...
 end
