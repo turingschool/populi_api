@@ -13,13 +13,13 @@ module PopuliAPI
   class << self
     attr_reader :connection
 
-    def connect(auth_token: nil, school: nil)
+    def connect(access_key: nil, school: nil)
       return @connection if @connection.present?
 
-      raise MissingArgumentError.new("Must provide an auth_token") unless auth_token.present?
+      raise MissingArgumentError.new("Must provide an access_key") unless access_key.present?
       raise MissingArgumentError.new("Must provide a school") unless school.present?
 
-      @connection = Connection.new(build_url(school), auth_token)
+      @connection = Connection.new(url: build_url(school), access_key: access_key)
     end
 
     def reset!
