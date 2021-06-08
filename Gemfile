@@ -7,3 +7,6 @@ gem "rake", "~> 12.0"
 gem "rspec", "~> 3.0"
 
 gem "faraday", "~> 1.4"
+gem "faraday_middleware"
+gem "hashie"
+gem "activesupport", "~> 6.1"
