@@ -1,3 +1,42 @@
 #!/usr/bin/env ruby
 
 require "populi_api"
+
+SCHOOL = ENV["POPULI_SCHOOL_NAME"]
+ACCESS_KEY = ENV["POPULI_API_ACCESS_KEY"]
+
+command_name = File.basename(__FILE__)
+HELPDOC = <<~HELP
+NAME
+\t#{command_name} - access the Populi API from the command line
+
+SYNOPSIS
+\t#{command_name} <task> <params>
+
+DESCRIPTION
+\tExpects that you have set the following environment variables.
+
+\t- POPULI_SCHOOL_NAME - the subdomain for your Populi site
+\t    (i.e. "yourcollege" in "yourcollege.populiweb.com")
+\t- POPULI_API_ACCESS_KEY
+
+\t<params> argument is expected to be formatted as Ruby
+\tnamed arguments, e.g. "foo: 'bar'"
+
+EXAMPLES
+\tCall the task getPerson with person_id: 1
+
+\t$ #{command_name} getPerson "person_id: 1"
+HELP
+
+task, params = ARGV[0..1]
+
+if ["help", "--help", "-h"].include? task
+  puts HELPDOC
+  exit 1
+end
+
+params_hash = eval("{ #{params} }")
+
+PopuliAPI.connect(school: SCHOOL, access_key: ACCESS_KEY)
+pp PopuliAPI.send(task, params_hash)
