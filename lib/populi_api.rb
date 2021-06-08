@@ -1,13 +1,11 @@
 require "active_support"
 require "active_support/core_ext/string/inflections"
 
-require "populi_api/connection"
 require "populi_api/version"
+require "populi_api/errors"
+require "populi_api/connection"
 
 module PopuliAPI
-  class Error < StandardError; end
-  class MissingArgumentError < Error; end
-
   POPULI_API_DOMAIN = "https://{school}.populiweb.com/api/"
 
   class << self
@@ -24,6 +22,12 @@ module PopuliAPI
 
     def reset!
       @connection = nil
+    end
+
+    def method_missing(method_name, *args)
+      raise NoConnectionError unless connection.present?
+
+      connection.send(method_name, *args)
     end
 
     private def build_url(school)
