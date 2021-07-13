@@ -9,7 +9,7 @@ Built by the folks at [Turing School](https://turing.edu).
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'populi_api'
+gem 'populi_api', git: 'https://github.com/turingschool/populi_api.git', branch: 'main'
 ```
 
 And then execute:
