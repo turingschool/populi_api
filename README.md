@@ -29,6 +29,12 @@ Keyword arguments supplied will be converted into the params for the API call.
 ```ruby
 require "populi_api"
 
+# Establish a connection
+PopuliAPI.connect(
+  school: ENV["POPULI_SCHOOL_NAME"],
+  access_key: ENV["POPULI_API_ACCESS_KEY"]
+)
+
 PopuliAPI.get_person(person_id: 1)
 # => {
 #      "response"=> {
