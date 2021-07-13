@@ -38,7 +38,7 @@ module PopuliAPI
 
       raise_if_task_not_recognized task
 
-      request_body(task: task, params: args.first)
+      request_body(task: task, params: args.first || {})
     end
 
     private
