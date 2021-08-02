@@ -8,6 +8,12 @@ module PopuliAPI
   class Connection
     include Tasks
 
+    FARADAY_BUILDER_CONFIG = Proc.new do |builder|
+      builder.request :url_encoded
+      builder.response :mashify  # Convert to Hashie::Mash
+      builder.response :xml      # Parse XML
+    end
+
     attr_reader :config, :_connection
 
     def initialize(url: nil, access_key: nil, log_requests: false, inject_connection: nil)
@@ -48,9 +54,7 @@ module PopuliAPI
         url: config.url,
         headers: { "Authorization" => config.access_key }
       ) do |builder|
-        builder.request :url_encoded
-        builder.response :mashify  # Convert to Hashie::Mash
-        builder.response :xml      # Parse XML
+        FARADAY_BUILDER_CONFIG.call(builder)
 
         if config.log_requests
           builder.response :logger, nil, { bodies: false, log_level: :info }
