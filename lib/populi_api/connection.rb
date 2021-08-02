@@ -10,7 +10,6 @@ module PopuliAPI
 
     FARADAY_BUILDER_CONFIG = Proc.new do |builder|
       builder.request :url_encoded
-      builder.response :mashify  # Convert to Hashie::Mash
       builder.response :xml      # Parse XML
     end
 

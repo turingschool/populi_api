@@ -52,9 +52,10 @@ RSpec.describe PopuliAPI::Connection do
       subject.request(task: task, params: params)
     end
 
-    it "returns a parsed XML response as a Hashie::Mash structure" do
+    it "returns a parsed XML response as a Hash structure" do
       response = subject.request(task: task, params: params)
-      expect(response.body.response.result).to eq("SUCCESS")
+      expect(response.body.class).to eq(Hash)
+      expect(response.body["response"]["result"]).to eq("SUCCESS")
       stubs.verify_stubbed_calls
     end
   end
@@ -74,7 +75,7 @@ RSpec.describe PopuliAPI::Connection do
       result = subject.request_body(task: task, params: params)
 
       expect(result.keys).to contain_exactly("response")
-      expect(result.response.result).to eq("SUCCESS")
+      expect(result["response"]["result"]).to eq("SUCCESS")
     end
   end
 
