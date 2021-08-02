@@ -17,9 +17,8 @@ RSpec.describe PopuliAPI::Connection do
           ]
         end
       end
-      b.request :url_encoded
-      b.response :mashify
-      b.response :xml
+
+      PopuliAPI::Connection::FARADAY_BUILDER_CONFIG.call(b)
     end
   end
 
