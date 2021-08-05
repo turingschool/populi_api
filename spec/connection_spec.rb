@@ -42,18 +42,18 @@ RSpec.describe PopuliAPI::Connection do
     end
   end
 
-  context "#request(task:, params:)" do
+  context "#request_raw(task:, params:)" do
     let(:task) { "getData" }
     let(:params) { { id: "3", resource: "foo" } }
 
     it "sends an HTTP Post request with the task & params in the body" do
       expect(mock_api).to receive(:post).with("", params.merge(task: task))
 
-      subject.request(task: task, params: params)
+      subject.request_raw(task: task, params: params)
     end
 
     it "returns a parsed XML response as a Hash structure" do
-      response = subject.request(task: task, params: params)
+      response = subject.request_raw(task: task, params: params)
       expect(response.body.class).to eq(Hash)
       expect(response.body["response"]["result"]).to eq("SUCCESS")
       stubs.verify_stubbed_calls
@@ -64,11 +64,11 @@ RSpec.describe PopuliAPI::Connection do
     let(:task) { "getData" }
     let(:params) { { id: "3", resource: "foo" } }
 
-    it "wraps #request" do
-      expect(subject).to receive(:request).with(task: task, params: params)
-        .and_return(Hashie::Mash.new({ body: 'x' }))
+    it "wraps #request_raw" do
+      allow(subject).to receive(:request_raw).and_return(Hashie::Mash.new({ body: 'x' }))
 
       subject.request_body(task: task, params: params)
+      expect(subject).to have_received(:request_raw).with(task: task, params: params)
     end
 
     it "returns the request body, not the full request object" do
