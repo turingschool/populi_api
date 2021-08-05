@@ -33,7 +33,7 @@ module PopuliAPI
       _connection.post("", params.merge(task: task))
     end
 
-    def request_body(task:, params: {})
+    def request(task:, params: {})
       response = self.request_raw(task: task, params: params)
       response.body
     end
@@ -43,7 +43,7 @@ module PopuliAPI
 
       raise_if_task_not_recognized task
 
-      request_body(task: task, params: args.first || {})
+      request(task: task, params: args.first || {})
     end
 
     private
