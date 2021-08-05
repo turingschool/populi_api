@@ -60,19 +60,19 @@ RSpec.describe PopuliAPI::Connection do
     end
   end
 
-  context "#request_body(task:, params:)" do
+  context "#request(task:, params:)" do
     let(:task) { "getData" }
     let(:params) { { id: "3", resource: "foo" } }
 
     it "wraps #request_raw" do
       allow(subject).to receive(:request_raw).and_return(Hashie::Mash.new({ body: 'x' }))
 
-      subject.request_body(task: task, params: params)
+      subject.request(task: task, params: params)
       expect(subject).to have_received(:request_raw).with(task: task, params: params)
     end
 
     it "returns the request body, not the full request object" do
-      result = subject.request_body(task: task, params: params)
+      result = subject.request(task: task, params: params)
 
       expect(result.keys).to contain_exactly("response")
       expect(result["response"]["result"]).to eq("SUCCESS")
@@ -80,19 +80,19 @@ RSpec.describe PopuliAPI::Connection do
   end
 
   context "calling tasks as methods" do
-    it "will convert tasks called as methods into #request_body() invocations" do
-      expect(subject).to receive(:request_body)
+    it "will convert tasks called as methods into #request() invocations" do
+      expect(subject).to receive(:request)
         .with(task: "getPerson", params: { person_id: 1 })
 
       subject.get_person(person_id: 1)
     end
 
     it "allows methods to be called in either camelCase or snake_case format" do
-      expect(subject).to receive(:request_body)
+      expect(subject).to receive(:request)
         .with(task: "getPerson", params: { person_id: 2 })
       subject.getPerson(person_id: 2)
 
-      expect(subject).to receive(:request_body)
+      expect(subject).to receive(:request)
         .with(task: "getPerson", params: { person_id: 3 })
       subject.get_person(person_id: 3)
     end
