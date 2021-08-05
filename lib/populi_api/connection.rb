@@ -29,12 +29,12 @@ module PopuliAPI
       @_connection = create_connection
     end
 
-    def request(task:, params: {})
+    def request_raw(task:, params: {})
       _connection.post("", params.merge(task: task))
     end
 
     def request_body(task:, params: {})
-      response = self.request(task: task, params: params)
+      response = self.request_raw(task: task, params: params)
       response.body
     end
 
