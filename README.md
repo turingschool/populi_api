@@ -61,14 +61,28 @@ It treats `camelCase` and `snake_case` formats as equivalent, so you can use eit
 PopuliAPI.get_person == PopuliAPI.getPerson
 ```
 
-The XML response is parsed into a [Hashie::Mash](https://github.com/hashie/hashie), so you can traverse it using key-indexing syntax or method-style syntax or a mix of both. Up to you.
+The XML response is parsed into an [ActiveSupport::HashWithIndifferentAccess](https://api.rubyonrails.org/classes/ActiveSupport/HashWithIndifferentAccess.html), so you can traverse it using strings or symbols for keys. Up to you.
 
 ```ruby
 response = PopuliAPI.get_person(person_id: 1)
 
-person = response["response"]
+person = response[:response]
 person.first              # => "James 'Logan'"
 person.email["address"]   # => "wolverine@xmansion.edu"
+```
+
+### Errors
+
+If a request to the API fails in a predictable way, Populi will return a non-200 status code HTTP response (usually 400) with XML describing the error. See the [API Basics docs](https://support.populiweb.com/hc/en-us/articles/223798787-API-Basics) for more information.
+
+When using the `PopuliAPI` request methods, you can choose to either have these error responses return the response body as expected, or to raise an exception. To have a request raise an exception on failure, append a `!` to the method.
+
+```ruby
+PopuliAPI.get_person(person_id: "not-an-id")
+# => {"error"=>{"code"=>"BAD_PARAMETER", "message"=>"Please pass in a valid person_id or student_id"}}
+
+PopuliAPI.get_person!(person_id: "not-an-id")
+# => raises "PopuliAPI::BadParameterError (Please pass in a valid person_id or student_id)"
 ```
 
 ## Development
