@@ -263,7 +263,7 @@ module PopuliAPI
   module Tasks
     def normalize_task(task)
       as_camel = task.to_s.camelize(:lower).delete_suffix('!')
-      do_raise = task.end_with?('!')
+      do_raise = task.to_s.end_with?('!')
       [as_camel, do_raise]
     end
 
