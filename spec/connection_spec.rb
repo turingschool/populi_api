@@ -78,7 +78,9 @@ RSpec.describe PopuliAPI::Connection do
 
   context "#request(task:, params:)" do
     it "wraps #request_raw" do
-      allow(subject).to receive(:request_raw).and_return(Hashie::Mash.new({ body: 'x' }))
+      mock_response = double("response")
+      allow(mock_response).to receive(:body).and_return({ result: "SUCCESS" })
+      allow(subject).to receive(:request_raw).and_return(mock_response)
 
       subject.request(task: task, params: params)
       expect(subject).to have_received(:request_raw).with(task: task, params: params)
