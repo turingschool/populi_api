@@ -1,6 +1,5 @@
 require "faraday"
 require "faraday_middleware"
-require "hashie"
 
 require "populi_api/errors"
 require "populi_api/middleware"
@@ -9,6 +8,8 @@ require "populi_api/tasks"
 module PopuliAPI
   class Connection
     include Tasks
+
+    Config = Struct.new(:url, :access_key, :log_requests, keyword_init: true)
 
     FARADAY_BUILDER_CONFIG = Proc.new do |builder|
       builder.request :url_encoded
@@ -24,11 +25,11 @@ module PopuliAPI
         return self
       end
 
-      @config = Hashie::Mash.new({
+      @config = Config.new(
         url: url,
         access_key: access_key,
         log_requests: log_requests
-      })
+      )
       @_connection = create_connection
     end
 
