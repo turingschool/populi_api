@@ -3,6 +3,7 @@ require "faraday_middleware"
 require "hashie"
 
 require "populi_api/tasks"
+require "populi_api/errors"
 
 module PopuliAPI
   class Connection
@@ -38,12 +39,20 @@ module PopuliAPI
       response.body
     end
 
-    def method_missing(method_name, *args)
-      task = normalize_task(method_name)
+    def request!(task:, params: {})
+      response = self.request_raw(task: task, params: params)
 
+      return response.body if response.success?
+
+      raise error_for(response)
+    end
+
+    def method_missing(method_name, *args)
+      task, do_raise = normalize_task(method_name)
       raise_if_task_not_recognized task
 
-      request(task: task, params: args.first || {})
+      method = do_raise ? :request! : :request
+      self.send(method, { task: task, params: args.first || {} })
     end
 
     private
@@ -58,6 +67,17 @@ module PopuliAPI
         if config.log_requests
           builder.response :logger, nil, { bodies: false, log_level: :info }
         end
+      end
+    end
+
+    def error_for(response)
+      error_code = response.body&.dig("error", "code")
+      error_message = response.body&.dig("error", "message")
+
+      if error_code.present?
+        ServerError.from_code(error_code).new(error_message, response)
+      else
+        ServerError.new("Failed response!", response)
       end
     end
   end

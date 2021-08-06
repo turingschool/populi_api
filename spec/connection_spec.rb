@@ -1,4 +1,6 @@
 RSpec.describe PopuliAPI::Connection do
+  RETURN_ERROR = 'return_error'
+
   let(:access_key) { "magnetosux" }
   let(:url) { "https://xmansion.populiweb.com/api/" }
 
@@ -7,20 +9,37 @@ RSpec.describe PopuliAPI::Connection do
     Faraday.new do |b|
       b.adapter(:test, stubs) do |stub|
         stub.post("/") do |env|
-          [
-            200,
-            { "Content-Type": "application/xml" },
-            <<~XML
-              <?xml version="1.0" encoding="UTF-8"?>
-              <response><result>SUCCESS</result></response>
-            XML
-          ]
+          if env.request_body.include? RETURN_ERROR
+            [
+              400,
+              { "content-type": "text/xml;charset=UTF-8" },
+              <<~XML
+                <?xml version="1.0" encoding="UTF-8"?>
+                <error>
+                  <code>OTHER_ERROR</code>
+                  <message>This is an error message.</message>
+                </error>
+              XML
+            ]
+          else
+            [
+              200,
+              { "content-type": "text/xml;charset=UTF-8" },
+              <<~XML
+                <?xml version="1.0" encoding="UTF-8"?>
+                <response><result>SUCCESS</result></response>
+              XML
+            ]
+          end
         end
       end
 
       PopuliAPI::Connection::FARADAY_BUILDER_CONFIG.call(b)
     end
   end
+
+  let(:task) { "getData" }
+  let(:params) { { id: "3", resource: "foo" } }
 
   # use stubbed Faraday connection by default
   subject { PopuliAPI::Connection.new(inject_connection: mock_api) }
@@ -43,9 +62,6 @@ RSpec.describe PopuliAPI::Connection do
   end
 
   context "#request_raw(task:, params:)" do
-    let(:task) { "getData" }
-    let(:params) { { id: "3", resource: "foo" } }
-
     it "sends an HTTP Post request with the task & params in the body" do
       expect(mock_api).to receive(:post).with("", params.merge(task: task))
 
@@ -61,9 +77,6 @@ RSpec.describe PopuliAPI::Connection do
   end
 
   context "#request(task:, params:)" do
-    let(:task) { "getData" }
-    let(:params) { { id: "3", resource: "foo" } }
-
     it "wraps #request_raw" do
       allow(subject).to receive(:request_raw).and_return(Hashie::Mash.new({ body: 'x' }))
 
@@ -76,6 +89,30 @@ RSpec.describe PopuliAPI::Connection do
 
       expect(result.keys).to contain_exactly("response")
       expect(result["response"]["result"]).to eq("SUCCESS")
+    end
+
+    context "when response returns an error" do
+      it "returns the body without raising an error" do
+        result = subject.request(task: RETURN_ERROR)
+
+        expect(result.keys).to contain_exactly("error")
+        expect(result["error"]["code"]).to eq("OTHER_ERROR")
+      end
+    end
+  end
+
+  context "#request!(task:, params:)" do
+    it "like #request, but will raise an error if the response is not successful" do
+      expect { subject.request!(task: task, params: params) }.to_not raise_error
+
+      expect do
+        subject.request!(task: RETURN_ERROR)
+      end.to raise_error do |error|
+        expect(error.class).to be(PopuliAPI::OtherError)
+        expect(error.code).to eq("OTHER_ERROR")
+        expect(error.message).to eq("This is an error message.")
+        expect(error.response).to be_present
+      end
     end
   end
 
@@ -100,6 +137,18 @@ RSpec.describe PopuliAPI::Connection do
     it "throws a TaskNotFoundError error if the task is not in the set of API_TASKS" do
       expect { subject.not_a_task(foo: "bar") }
         .to raise_error(PopuliAPI::TaskNotFoundError)
+    end
+
+    it "uses #request! instead of #request if ! suffix is appended" do
+      expect(subject).to receive(:request!)
+        .with(task: "getPerson", params: { person_id: 2 })
+      subject.getPerson!(person_id: 2)
+    end
+
+    it "throws errors if ! suffix is appended and server returns error" do
+      expect do
+        subject.getPerson!(person_id: RETURN_ERROR)
+      end.to raise_error(PopuliAPI::OtherError)
     end
   end
 end
