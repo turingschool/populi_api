@@ -68,10 +68,10 @@ RSpec.describe PopuliAPI::Connection do
       subject.request_raw(task: task, params: params)
     end
 
-    it "returns a parsed XML response as a Hash structure" do
+    it "returns a parsed XML response as a HashWithIndifferentAccess structure" do
       response = subject.request_raw(task: task, params: params)
-      expect(response.body.class).to eq(Hash)
-      expect(response.body["response"]["result"]).to eq("SUCCESS")
+      expect(response.body.class).to eq(ActiveSupport::HashWithIndifferentAccess)
+      expect(response.body[:response][:result]).to eq("SUCCESS")
       stubs.verify_stubbed_calls
     end
   end

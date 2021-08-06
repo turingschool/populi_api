@@ -2,8 +2,9 @@ require "faraday"
 require "faraday_middleware"
 require "hashie"
 
-require "populi_api/tasks"
 require "populi_api/errors"
+require "populi_api/middleware"
+require "populi_api/tasks"
 
 module PopuliAPI
   class Connection
@@ -11,7 +12,8 @@ module PopuliAPI
 
     FARADAY_BUILDER_CONFIG = Proc.new do |builder|
       builder.request :url_encoded
-      builder.response :xml      # Parse XML
+      builder.response :indifferent_hashify
+      builder.response :xml # Parse XML
     end
 
     attr_reader :config, :_connection
