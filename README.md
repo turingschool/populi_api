@@ -31,8 +31,8 @@ require "populi_api"
 
 # Establish a connection
 PopuliAPI.connect(
-  school: ENV["POPULI_SCHOOL_NAME"],
-  access_key: ENV["POPULI_API_ACCESS_KEY"]
+  url: ENV["POPULI_API_URL"],               # e.g. https://yourschool.populiweb.com/api/
+  access_key: ENV["POPULI_API_ACCESS_KEY"]  # see "Authorization" section below
 )
 
 PopuliAPI.get_person(person_id: 1)
@@ -70,6 +70,10 @@ person = response[:response]
 person.first              # => "James 'Logan'"
 person.email["address"]   # => "wolverine@xmansion.edu"
 ```
+
+### Authorization
+
+All requests require an API `access_key`. You'll need to pre-fetch this from the API using the [Access Key Request Structure](https://support.populiweb.com/hc/en-us/articles/223798787-API-Basics).
 
 ### Errors
 

@@ -6,18 +6,16 @@ require "populi_api/errors"
 require "populi_api/connection"
 
 module PopuliAPI
-  POPULI_API_DOMAIN = "https://{school}.populiweb.com/api/"
-
   class << self
     attr_reader :connection
 
-    def connect(access_key: nil, school: nil)
+    def connect(access_key: nil, url: nil)
       return @connection if @connection.present?
 
+      raise MissingArgumentError.new("Must provide an API url") unless url.present?
       raise MissingArgumentError.new("Must provide an access_key") unless access_key.present?
-      raise MissingArgumentError.new("Must provide a school") unless school.present?
 
-      @connection = Connection.new(url: build_url(school), access_key: access_key)
+      @connection = Connection.new(url: url, access_key: access_key)
     end
 
     def reset!
@@ -28,10 +26,6 @@ module PopuliAPI
       raise NoConnectionError unless connection.present?
 
       connection.send(method_name, *args)
-    end
-
-    private def build_url(school)
-      POPULI_API_DOMAIN.sub("{school}", school)
     end
   end
 end

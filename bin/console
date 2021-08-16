@@ -6,7 +6,7 @@ require "populi_api"
 # You can add fixtures and/or initialization code here to make experimenting
 # with your gem easier. You can also use a different console, if you like.
 PopuliAPI.connect(
-  school: ENV["POPULI_SCHOOL_NAME"],
+  url: ENV["POPULI_API_URL"],
   access_key: ENV["POPULI_API_ACCESS_KEY"]
 )
 

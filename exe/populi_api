@@ -2,7 +2,7 @@
 
 require "populi_api"
 
-SCHOOL = ENV["POPULI_SCHOOL_NAME"]
+API_URL = ENV["POPULI_API_URL"]
 ACCESS_KEY = ENV["POPULI_API_ACCESS_KEY"]
 
 command_name = File.basename(__FILE__)
@@ -16,9 +16,9 @@ SYNOPSIS
 DESCRIPTION
 \tExpects that you have set the following environment variables.
 
-\t- POPULI_SCHOOL_NAME - the subdomain for your Populi site
-\t    (i.e. "yourcollege" in "yourcollege.populiweb.com")
-\t- POPULI_API_ACCESS_KEY
+\t- POPULI_API_URL - the API url for your Populi site
+\t    (e.g. "https://yourschool.populiweb.com/api/")
+\t- POPULI_API_ACCESS_KEY - access key granted for user
 
 \t<params> argument is expected to be formatted as Ruby
 \tnamed arguments, e.g. "foo: 'bar'"
@@ -38,5 +38,5 @@ end
 
 params_hash = eval("{ #{params} }")
 
-PopuliAPI.connect(school: SCHOOL, access_key: ACCESS_KEY)
+PopuliAPI.connect(url: API_URL, access_key: ACCESS_KEY)
 pp PopuliAPI.send(task, params_hash)
