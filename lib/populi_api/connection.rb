@@ -38,16 +38,20 @@ module PopuliAPI
     end
 
     def request(task, params = {})
-      response = self.request_raw(task, params)
+      response = paginate_task?(task) \
+        ? self.auto_paginate_requests(task, params) \
+        : self.request_raw(task, params)
+
       response.body
     end
 
     def request!(task, params = {})
-      response = self.request_raw(task, params)
+      response = paginate_task?(task) \
+        ? self.auto_paginate_requests(task, params) \
+        : self.request_raw(task, params)
 
-      return response.body if response.success?
-
-      raise error_for(response)
+      raise error_for(response) unless response.success?
+      response.body
     end
 
     def method_missing(method_name, *args)
@@ -72,6 +76,54 @@ module PopuliAPI
           builder.response :logger, nil, { bodies: false, log_level: :info }
         end
       end
+    end
+
+    def auto_paginate_requests(task, params = {})
+      paginated_task = get_paginated_task(task)
+      record_key_path = paginated_task.record_key_path
+      page_or_offset = paginated_task.page_or_offset
+
+      pagination_params = case page_or_offset
+                          when :page
+                            { page: 1 }
+                          when :offset
+                            { offset: 0 }
+                          end
+
+      main_response = curr_response = \
+        self.request_raw(task, params.merge(pagination_params))
+      total = main_response.body[:response][:num_results].to_i
+      puts "TOTAL: #{total}"
+
+      loop do
+        acc_records = main_response.body[:response].dig(*record_key_path)
+        break if total == acc_records.count
+
+        unless curr_response.success?
+          main_response = curr_response
+          break
+        end
+
+        next_index = case page_or_offset
+                     when :page
+                       pagination_params[:page] + 1
+                     when :offset
+                       acc_records.count
+                     end
+        pagination_params = { page_or_offset => next_index }
+
+        curr_response = self.request_raw(task, params.merge(pagination_params))
+        records = curr_response.body[:response].dig(*record_key_path)
+
+        if record_key_path.size == 1
+          main_response.body[:response][record_key_path.first] = acc_records + records
+        else
+          path, key = record_key_path[0...-1], record_key_path.last
+          main_response.body[:response].dig(*path)[key] = acc_records + records
+        end
+      end
+
+      main_response
     end
 
     def error_for(response)

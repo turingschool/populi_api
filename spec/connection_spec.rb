@@ -142,8 +142,70 @@ RSpec.describe PopuliAPI::Connection do
 
     it "throws errors if ! suffix is appended and server returns error" do
       expect do
-        subject.getPerson!(person_id: RETURN_ERROR)
+        subject.getPerson!(fixture: "error.xml")
       end.to raise_error(PopuliAPI::OtherError)
+    end
+  end
+
+  context "pagination in #request and #request!" do
+    let(:role_members_responses) do
+      [
+        instance_double(
+          "Faraday::Response",
+          body: parse_xml(fixture("get_role_members_page_1.xml")),
+          success?: true
+        ),
+        instance_double(
+          "Faraday::Response",
+          body: parse_xml(fixture("get_role_members_page_2.xml")),
+          success?: true
+        )
+      ]
+    end
+
+    let(:updated_enrollments_responses) do
+      [
+        instance_double(
+          "Faraday::Response",
+          body: parse_xml(fixture("get_updated_enrollment_offset_0.xml")),
+          success?: true
+        ),
+        instance_double(
+          "Faraday::Response",
+          body: parse_xml(fixture("get_updated_enrollment_offset_10.xml")),
+          success?: true
+        )
+      ]
+    end
+
+    it "will automatically aggregate data from paginated responses" do
+      paginating_task = "getRoleMembers"
+      allow(subject).to receive(:request_raw)
+        .with(paginating_task, { page: 1 })
+        .and_return(role_members_responses[0])
+      allow(subject).to receive(:request_raw)
+        .with(paginating_task, { page: 2 })
+        .and_return(role_members_responses[1])
+
+      role_members = subject.getRoleMembers!
+      expect(role_members[:response][:num_results]).to eq("35")
+      expect(role_members[:response][:person].count).to eq(35)
+      expect(role_members[:response][:person].last[:personID]).to eq("35")
+    end
+
+    it "works with endpoints that use offset as well" do
+      paginating_task = "getUpdatedEnrollment"
+      allow(subject).to receive(:request_raw)
+        .with(paginating_task, { offset: 0 })
+        .and_return(updated_enrollments_responses[0])
+      allow(subject).to receive(:request_raw)
+        .with(paginating_task, { offset: 10 })
+        .and_return(updated_enrollments_responses[1])
+
+      enrollments = subject.getUpdatedEnrollment!
+      expect(enrollments[:response][:num_results]).to eq("13")
+      expect(enrollments[:response][:enrollment].count).to eq(13)
+      expect(enrollments[:response][:enrollment].last[:id]).to eq("13")
     end
   end
 end

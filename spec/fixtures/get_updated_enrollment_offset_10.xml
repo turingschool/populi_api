@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<response num_results="13">
+  <enrollment>
+    <id>11</id>
+    <person_id>204</person_id>
+    <status>ENROLLED</status>
+    <credits>1.09</credits>
+    <hours>19.44</hours>
+    <person_first_name>Tilda</person_first_name>
+    <person_last_name>Larkings</person_last_name>
+  </enrollment>
+  <enrollment>
+    <id>12</id>
+    <person_id>551</person_id>
+    <status>ENROLLED</status>
+    <credits>2.58</credits>
+    <hours>14.51</hours>
+    <person_first_name>Marcelline</person_first_name>
+    <person_last_name>Elcock</person_last_name>
+  </enrollment>
+  <enrollment>
+    <id>13</id>
+    <person_id>516</person_id>
+    <status>ENROLLED</status>
+    <credits>3.4</credits>
+    <hours>26.84</hours>
+    <person_first_name>Dyan</person_first_name>
+    <person_last_name>Thrussell</person_last_name>
+  </enrollment>
+</response>

@@ -11,6 +11,10 @@ module FixtureHelpers
   def fixture(filename)
     File.read fixture_path(filename)
   end
+
+  def parse_xml(xml)
+    FaradayMiddleware::ParseXml.new.parse(xml).with_indifferent_access
+  end
 end
 
 RSpec.configure do |config|
