@@ -1,6 +1,18 @@
 require "bundler/setup"
 require "populi_api"
 
+SPEC_PATH = __dir__
+
+module FixtureHelpers
+  def fixture_path(filename)
+    File.join(SPEC_PATH, "fixtures/#{filename}").to_s
+  end
+
+  def fixture(filename)
+    File.read fixture_path(filename)
+  end
+end
+
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = ".rspec_status"
@@ -11,4 +23,6 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  config.include FixtureHelpers
 end
