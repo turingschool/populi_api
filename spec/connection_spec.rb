@@ -61,33 +61,33 @@ RSpec.describe PopuliAPI::Connection do
     end
   end
 
-  context "#request_raw(task:, params:)" do
+  context "#request_raw(task, params)" do
     it "sends an HTTP Post request with the task & params in the body" do
       expect(mock_api).to receive(:post).with("", params.merge(task: task))
 
-      subject.request_raw(task: task, params: params)
+      subject.request_raw(task, params)
     end
 
     it "returns a parsed XML response as a HashWithIndifferentAccess structure" do
-      response = subject.request_raw(task: task, params: params)
+      response = subject.request_raw(task, params)
       expect(response.body.class).to eq(ActiveSupport::HashWithIndifferentAccess)
       expect(response.body[:response][:result]).to eq("SUCCESS")
       stubs.verify_stubbed_calls
     end
   end
 
-  context "#request(task:, params:)" do
+  context "#request(task, params)" do
     it "wraps #request_raw" do
       mock_response = double("response")
       allow(mock_response).to receive(:body).and_return({ result: "SUCCESS" })
       allow(subject).to receive(:request_raw).and_return(mock_response)
 
-      subject.request(task: task, params: params)
-      expect(subject).to have_received(:request_raw).with(task: task, params: params)
+      subject.request(task, params)
+      expect(subject).to have_received(:request_raw).with(task, params)
     end
 
     it "returns the request body, not the full request object" do
-      result = subject.request(task: task, params: params)
+      result = subject.request(task, params)
 
       expect(result.keys).to contain_exactly("response")
       expect(result["response"]["result"]).to eq("SUCCESS")
@@ -95,7 +95,7 @@ RSpec.describe PopuliAPI::Connection do
 
     context "when response returns an error" do
       it "returns the body without raising an error" do
-        result = subject.request(task: RETURN_ERROR)
+        result = subject.request(RETURN_ERROR)
 
         expect(result.keys).to contain_exactly("error")
         expect(result["error"]["code"]).to eq("OTHER_ERROR")
@@ -103,12 +103,12 @@ RSpec.describe PopuliAPI::Connection do
     end
   end
 
-  context "#request!(task:, params:)" do
+  context "#request!(task, params)" do
     it "like #request, but will raise an error if the response is not successful" do
-      expect { subject.request!(task: task, params: params) }.to_not raise_error
+      expect { subject.request!(task, params) }.to_not raise_error
 
       expect do
-        subject.request!(task: RETURN_ERROR)
+        subject.request!(RETURN_ERROR)
       end.to raise_error do |error|
         expect(error.class).to be(PopuliAPI::OtherError)
         expect(error.code).to eq("OTHER_ERROR")
@@ -121,18 +121,28 @@ RSpec.describe PopuliAPI::Connection do
   context "calling tasks as methods" do
     it "will convert tasks called as methods into #request() invocations" do
       expect(subject).to receive(:request)
-        .with(task: "getPerson", params: { person_id: 1 })
+        .with("getPerson", { person_id: 1 })
 
       subject.get_person(person_id: 1)
     end
 
     it "allows methods to be called in either camelCase or snake_case format" do
       expect(subject).to receive(:request)
-        .with(task: "getPerson", params: { person_id: 2 })
+        .with("getPerson", { person_id: 2 })
       subject.getPerson(person_id: 2)
 
       expect(subject).to receive(:request)
-        .with(task: "getPerson", params: { person_id: 3 })
+        .with("getPerson", { person_id: 3 })
+      subject.get_person(person_id: 3)
+    end
+
+    it "allows methods to be called with params as hash or named arguments" do
+      expect(subject).to receive(:request)
+        .with("getPerson", { person_id: 2 })
+      subject.getPerson({ person_id: 2 })
+
+      expect(subject).to receive(:request)
+        .with("getPerson", { person_id: 3 })
       subject.get_person(person_id: 3)
     end
 
@@ -143,7 +153,7 @@ RSpec.describe PopuliAPI::Connection do
 
     it "uses #request! instead of #request if ! suffix is appended" do
       expect(subject).to receive(:request!)
-        .with(task: "getPerson", params: { person_id: 2 })
+        .with("getPerson", { person_id: 2 })
       subject.getPerson!(person_id: 2)
     end
 

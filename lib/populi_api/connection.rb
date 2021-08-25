@@ -33,17 +33,17 @@ module PopuliAPI
       @_connection = create_connection
     end
 
-    def request_raw(task:, params: {})
+    def request_raw(task, params = {})
       _connection.post("", params.merge(task: task))
     end
 
-    def request(task:, params: {})
-      response = self.request_raw(task: task, params: params)
+    def request(task, params = {})
+      response = self.request_raw(task, params)
       response.body
     end
 
-    def request!(task:, params: {})
-      response = self.request_raw(task: task, params: params)
+    def request!(task, params = {})
+      response = self.request_raw(task, params)
 
       return response.body if response.success?
 
@@ -54,8 +54,9 @@ module PopuliAPI
       task, do_raise = normalize_task(method_name)
       raise_if_task_not_recognized task
 
+      params = args.first || {}
       method = do_raise ? :request! : :request
-      self.send(method, { task: task, params: args.first || {} })
+      self.send(method, task, params)
     end
 
     private
