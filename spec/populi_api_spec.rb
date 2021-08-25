@@ -57,5 +57,13 @@ RSpec.describe PopuliAPI do
 
       subject.get_person(person_id: 1)
     end
+
+    it "accepts either keyword arguments or a hash" do
+      expect(subject.connection).to receive(:get_person).with({ person_id: 1 })
+      subject.get_person({ person_id: 1 })
+
+      expect(subject.connection).to receive(:get_person).with(person_id: 2)
+      subject.get_person(person_id: 2)
+    end
   end
 end
