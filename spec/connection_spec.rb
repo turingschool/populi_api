@@ -1,6 +1,4 @@
 RSpec.describe PopuliAPI::Connection do
-  RETURN_ERROR = 'return_error'
-
   let(:access_key) { "magnetosux" }
   let(:url) { "https://xmansion.populiweb.com/api/" }
 
@@ -9,28 +7,13 @@ RSpec.describe PopuliAPI::Connection do
     Faraday.new do |b|
       b.adapter(:test, stubs) do |stub|
         stub.post("/") do |env|
-          if env.request_body.include? RETURN_ERROR
-            [
-              400,
-              { "content-type": "text/xml;charset=UTF-8" },
-              <<~XML
-                <?xml version="1.0" encoding="UTF-8"?>
-                <error>
-                  <code>OTHER_ERROR</code>
-                  <message>This is an error message.</message>
-                </error>
-              XML
-            ]
-          else
-            [
-              200,
-              { "content-type": "text/xml;charset=UTF-8" },
-              <<~XML
-                <?xml version="1.0" encoding="UTF-8"?>
-                <response><result>SUCCESS</result></response>
-              XML
-            ]
-          end
+          fixture = env.request_body.match(/fixture=([^&]*)/)&.captures&.first
+          status = fixture == "error.xml" ? 400 : 200
+          [
+            status,
+            { "content-type": "text/xml;charset=UTF-8" },
+            fixture(fixture || "success.xml")
+          ]
         end
       end
 
@@ -95,7 +78,7 @@ RSpec.describe PopuliAPI::Connection do
 
     context "when response returns an error" do
       it "returns the body without raising an error" do
-        result = subject.request(RETURN_ERROR)
+        result = subject.request(task, fixture: "error.xml")
 
         expect(result.keys).to contain_exactly("error")
         expect(result["error"]["code"]).to eq("OTHER_ERROR")
@@ -108,7 +91,7 @@ RSpec.describe PopuliAPI::Connection do
       expect { subject.request!(task, params) }.to_not raise_error
 
       expect do
-        subject.request!(RETURN_ERROR)
+        subject.request!(task, fixture: "error.xml")
       end.to raise_error do |error|
         expect(error.class).to be(PopuliAPI::OtherError)
         expect(error.code).to eq("OTHER_ERROR")
