@@ -94,6 +94,8 @@ module PopuliAPI
         self.request_raw(task, params.merge(pagination_params))
       total = main_response.body[:response][:num_results].to_i
 
+      return main_response if total == 1
+
       loop do
         acc_records = main_response.body[:response].dig(*record_key_path)
         break if acc_records.nil? || total == acc_records.count
