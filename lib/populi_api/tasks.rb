@@ -260,6 +260,35 @@ module PopuliAPI
     uploadFile
   ])
 
+  PaginatedTask = Struct.new(:task, :record_key_path, :page_or_offset)
+
+  #
+  # List of Paginated API Endpoints
+  #
+  # Some endpoints use page-based pagination, others use offset-based pagination.
+  # All of them will return a "num_results" attribute in the top-level <response>.
+  #
+  # Each task also uses a different tag name for the repeated record.
+  #
+  PAGINATED_API_TASKS = [
+    PaginatedTask.new("getEntriesForAccount", ["ledger_entry"], :page),
+    PaginatedTask.new("getInvoices", ["invoices", "invoice"], :page),
+    PaginatedTask.new("getLeads", ["lead"], :page),
+    PaginatedTask.new("getOrganizations", ["organization"], :page),
+    PaginatedTask.new("getPendingCharges", ["pending_charge"], :page),
+    PaginatedTask.new("getRoleMembers", ["person"], :page),
+    PaginatedTask.new("getStudentBalances", ["student_balance"], :page),
+    PaginatedTask.new("getTaggedPeople", ["person"], :page),
+    PaginatedTask.new("getTermStudents", ["student"], :page),
+    PaginatedTask.new("getTransactions", ["transaction"], :page),
+    PaginatedTask.new("getVoidedTransactions", ["transaction"], :page),
+
+    PaginatedTask.new("getApplications", ["application"], :offset),
+    PaginatedTask.new("getNews", ["article"], :offset),
+    PaginatedTask.new("getUpdatedEnrollment", ["enrollment"], :offset),
+    PaginatedTask.new("getUpdatedPeople", ["person"], :offset),
+  ].reduce({}) { |acc, pt| acc[pt.task] = pt; acc }.freeze
+
   module Tasks
     def normalize_task(task)
       as_camel = task.to_s.camelize(:lower).delete_suffix('!')
@@ -269,6 +298,15 @@ module PopuliAPI
 
     def raise_if_task_not_recognized(task)
       raise TaskNotFoundError unless API_TASKS.include? task
+    end
+
+    def get_paginated_task(task)
+      normalized_task, _ = normalize_task(task)
+      PAGINATED_API_TASKS[normalized_task]
+    end
+
+    def paginate_task?(task)
+      get_paginated_task(task).present?
     end
   end
 end
