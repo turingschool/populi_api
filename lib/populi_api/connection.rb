@@ -93,7 +93,6 @@ module PopuliAPI
       main_response = curr_response = \
         self.request_raw(task, params.merge(pagination_params))
       total = main_response.body[:response][:num_results].to_i
-      puts "TOTAL: #{total}"
 
       loop do
         acc_records = main_response.body[:response].dig(*record_key_path)
