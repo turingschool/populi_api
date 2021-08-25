@@ -96,7 +96,7 @@ module PopuliAPI
 
       loop do
         acc_records = main_response.body[:response].dig(*record_key_path)
-        break if total == acc_records.count
+        break if acc_records.nil? || total == acc_records.count
 
         unless curr_response.success?
           main_response = curr_response
