@@ -92,6 +92,8 @@ module PopuliAPI
 
       main_response = curr_response = \
         self.request_raw(task, params.merge(pagination_params))
+      return main_response if !main_response.success?
+
       total = main_response.body[:response][:num_results].to_i
 
       return main_response if total == 1

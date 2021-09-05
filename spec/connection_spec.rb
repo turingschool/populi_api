@@ -207,5 +207,12 @@ RSpec.describe PopuliAPI::Connection do
       expect(enrollments[:response][:enrollment].count).to eq(13)
       expect(enrollments[:response][:enrollment].last[:id]).to eq("13")
     end
+
+    it "returns early if a request returns error" do
+      paginating_task = "getTaggedPeople"
+      expect do
+        subject.request!(paginating_task, fixture: "error.xml")
+      end.to raise_error(PopuliAPI::OtherError)
+    end
   end
 end
