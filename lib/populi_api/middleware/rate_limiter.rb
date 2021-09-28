@@ -2,7 +2,7 @@ require "thread"
 require "tzinfo"
 
 # Rate limiter to prevent sending too many requests per second
-# Implmentation borrwed heavily from @sirupsen's https://github.com/sirupsen/airrecord
+# Implementation borrwed heavily from @sirupsen's https://github.com/sirupsen/airrecord
 module PopuliAPI
   class RateLimiter < Faraday::Middleware
 
