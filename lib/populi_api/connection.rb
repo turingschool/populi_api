@@ -2,7 +2,7 @@ require "faraday"
 require "faraday_middleware"
 
 require "populi_api/errors"
-require "populi_api/middleware"
+require "populi_api/middleware/indifferent_hashify"
 require "populi_api/tasks"
 
 module PopuliAPI
