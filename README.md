@@ -69,8 +69,8 @@ The XML response is parsed into an [ActiveSupport::HashWithIndifferentAccess](ht
 response = PopuliAPI.get_person(person_id: 1)
 
 person = response[:response]
-person.first              # => "James 'Logan'"
-person.email["address"]   # => "wolverine@xmansion.edu"
+person[:first]               # => "James 'Logan'"
+person["email"]["address"]   # => "wolverine@xmansion.edu"
 ```
 
 ### Authorization
