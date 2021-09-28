@@ -75,6 +75,12 @@ person.email["address"]   # => "wolverine@xmansion.edu"
 
 All requests require an API `access_key`. You'll need to pre-fetch this from the API using the [Access Key Request Structure](https://support.populiweb.com/hc/en-us/articles/223798787-API-Basics).
 
+### Rate Limiting
+
+All requests are configured to use rate limiting middleware that abides by [Populi's rate limiting policy](https://support.populiweb.com/hc/en-us/articles/223798787-API-Basics).
+
+As an end-user, this will appear as a slight enforced delay for requests when the requests-per-second limit is reached.
+
 ### Errors
 
 If a request to the API fails in a predictable way, Populi will return a non-200 status code HTTP response (usually 400) with XML describing the error. See the [API Basics docs](https://support.populiweb.com/hc/en-us/articles/223798787-API-Basics) for more information.
