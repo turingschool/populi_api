@@ -1,8 +1,4 @@
-require "active_support/testing/time_helpers"
-
 RSpec.describe PopuliAPI::RateLimiter do
-  include ActiveSupport::Testing::TimeHelpers
-
   let!(:faraday_app) { double("app") }
   let!(:sleep_tracker) { double("tracker") }
   let!(:stubs) { Faraday::Adapter::Test::Stubs.new }

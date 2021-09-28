@@ -1,4 +1,5 @@
 require "bundler/setup"
+require "active_support/testing/time_helpers"
 require "populi_api"
 
 SPEC_PATH = __dir__
@@ -29,4 +30,5 @@ RSpec.configure do |config|
   end
 
   config.include FixtureHelpers
+  config.include ActiveSupport::Testing::TimeHelpers
 end
