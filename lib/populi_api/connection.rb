@@ -3,6 +3,7 @@ require "faraday_middleware"
 
 require "populi_api/errors"
 require "populi_api/middleware/indifferent_hashify"
+require "populi_api/middleware/rate_limiter"
 require "populi_api/tasks"
 
 module PopuliAPI
@@ -13,6 +14,7 @@ module PopuliAPI
 
     FARADAY_BUILDER_CONFIG = Proc.new do |builder|
       builder.request :url_encoded
+      builder.request :populi_rate_limiter
       builder.response :indifferent_hashify
       builder.response :xml # Parse XML
     end
