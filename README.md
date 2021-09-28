@@ -4,6 +4,8 @@ A very simple, unofficial wrapper for the [Populi](https://populi.co/) API ([off
 
 Built by the folks at [Turing School](https://turing.edu).
 
+[![CircleCI](https://circleci.com/gh/turingschool/populi_api/tree/main.svg?style=shield)](https://circleci.com/gh/turingschool/populi_api/tree/main)
+
 ## Installation
 
 Add this line to your application's Gemfile:
