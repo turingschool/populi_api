@@ -27,30 +27,30 @@ RSpec.describe PopuliAPI::RateLimiter do
     expect(sleep_tracker).to_not have_received(:sleep)
   end
 
-  it "will wait if requests per second exceed limit" do
+  it "will wait if requests per minute exceed limit" do
     allow(sleep_tracker).to receive(:sleep)
 
-    subject.requests_per_second.times { connection.get(endpoint) }
+    subject.requests_per_minute.times { connection.get(endpoint) }
     expect(sleep_tracker).to_not have_received(:sleep)
 
     connection.get(endpoint)
     expect(sleep_tracker).to have_received(:sleep).once
   end
 
-  describe "#requests_per_second" do
+  describe "#requests_per_minute" do
     context "during peak hours (3AM to 7PM Pacific Standard Time)" do
       before { travel_to three_am.localtime }
 
-      it "uses 50 requests per second" do
-        expect(subject.requests_per_second).to eq(50)
+      it "uses 50 requests per minute" do
+        expect(subject.requests_per_minute).to eq(50)
       end
     end
 
     context "during off-peak hours (7AM to 3AM Pacific Standard Time)" do
       before { travel_to seven_pm.localtime }
 
-      it "uses 100 requests per second between 7AM and 3AM Pacific Standard Time" do
-        expect(subject.requests_per_second).to eq(100)
+      it "uses 100 requests per minute between 7AM and 3AM Pacific Standard Time" do
+        expect(subject.requests_per_minute).to eq(100)
       end
     end
   end
@@ -93,7 +93,7 @@ RSpec.describe PopuliAPI::RateLimiter do
         change { subject.class.requests }.from([]).to([100.001])
     end
 
-    it "never allows list to grow beyond the requests_per_second limit" do
+    it "never allows list to grow beyond the requests_per_minute limit" do
       travel_to three_am.localtime
 
       expect(subject.request_count).to eq(0)
@@ -101,13 +101,13 @@ RSpec.describe PopuliAPI::RateLimiter do
       expect(subject.request_count).to eq(50)
     end
 
-    it "clears the requests list if the most recent request was made more than 1 second ago" do
-      stub_clock_time(99.0)
+    it "clears the requests list if the most recent request was made more than 1 minute ago" do
+      stub_clock_time(100.0)
 
       23.times { subject.track_request }
       expect(subject.request_count).to eq(23)
 
-      stub_clock_time(100.01)
+      stub_clock_time(160.01)
 
       expect { subject.track_request }.to \
         change { subject.request_count }.from(23).to(1)

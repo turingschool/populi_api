@@ -1,7 +1,7 @@
 require "thread"
 require "tzinfo"
 
-# Rate limiter to prevent sending too many requests per second
+# Rate limiter to prevent sending too many requests per minute
 # Implementation borrwed heavily from @sirupsen's https://github.com/sirupsen/airrecord
 module PopuliAPI
   class RateLimiter < Faraday::Middleware
@@ -10,9 +10,10 @@ module PopuliAPI
     # https://support.populiweb.com/hc/en-us/articles/223798787-API-Basics
     TIMEZONE = TZInfo::Timezone.get("US/Pacific")
     PEAK_HOURS = 3...19 # 3AM to 7PM
-    PEAK_RPS = 50
-    OFF_PEAK_RPS = 100
+    PEAK_RPM = 50
+    OFF_PEAK_RPM = 100
 
+    ONE_MINUTE = 60.0
     DEFAULT_SLEEPER = ->(seconds) { sleep(seconds) }
 
     class << self
@@ -39,9 +40,9 @@ module PopuliAPI
 
     def track_request
       time = current_clocktime
-      clear if requests.any? && (time - requests.last) > 1.0
+      clear if requests.any? && (time - requests.last) > ONE_MINUTE
       requests << time
-      requests.shift if request_count > rps
+      requests.shift if request_count > rpm
     end
 
     def clear
@@ -52,18 +53,18 @@ module PopuliAPI
       requests.size
     end
 
-    def requests_per_second
-      return PEAK_RPS if PEAK_HOURS.member? current_hour_in_timezone
+    def requests_per_minute
+      return PEAK_RPM if PEAK_HOURS.member? current_hour_in_timezone
 
-      OFF_PEAK_RPS
+      OFF_PEAK_RPM
     end
-    alias rps requests_per_second
+    alias rpm requests_per_minute
 
     def delay_request?
       return false if requests.empty?
-      return false unless request_count >= rps
+      return false unless request_count >= rpm
 
-      window_span < 1.0
+      window_span < ONE_MINUTE
     end
 
     private
@@ -74,8 +75,8 @@ module PopuliAPI
 
     def wait
       # Time to wait until making the next request to stay within limits.
-      # If span is negative, default to 0 (cannot sleep for negative seconds)
-      wait_time = [1.0 - window_span, 0].max
+      # If span is negative, default to 0 (cannot sleep for negative minutes)
+      wait_time = [ONE_MINUTE - window_span, 0].max
       sleeper.call(wait_time)
     end
 
