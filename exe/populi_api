@@ -31,7 +31,7 @@ HELP
 
 task, params = ARGV[0..1]
 
-if ["help", "--help", "-h"].include? task
+if ["help", "--help", "-h"].include?(task) || task.nil?
   puts HELPDOC
   exit 1
 end
