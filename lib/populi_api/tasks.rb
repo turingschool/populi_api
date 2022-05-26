@@ -181,6 +181,7 @@ module PopuliAPI
     getStudentBalances
     getStudentDefaultTuitionSchedules
     getStudentDiscipline
+    getStudentEnrollment
     getStudentInfo
     getStudentMealPlan
     getStudentPrograms
