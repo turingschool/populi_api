@@ -120,11 +120,17 @@ module PopuliAPI
         curr_response = self.request_raw(task, params.merge(pagination_params))
         records = curr_response.body[:response].dig(*record_key_path)
 
+        if records.is_a?(Hash)
+          new_records = acc_records + [records]
+        else
+          new_records = acc_records + records
+        end
+
         if record_key_path.size == 1
-          main_response.body[:response][record_key_path.first] = acc_records + records
+          main_response.body[:response][record_key_path.first] = new_records
         else
           path, key = record_key_path[0...-1], record_key_path.last
-          main_response.body[:response].dig(*path)[key] = acc_records + records
+          main_response.body[:response].dig(*path)[key] = new_records
         end
       end
 

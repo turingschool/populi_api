@@ -178,6 +178,21 @@ RSpec.describe PopuliAPI::Connection do
       ]
     end
 
+    let(:applications_responses) do
+      [
+        instance_double(
+          "Faraday::Response",
+          body: parse_xml(fixture("get_applications_offset_0.xml")),
+          success?: true
+        ),
+        instance_double(
+          "Faraday::Response",
+          body: parse_xml(fixture("get_applications_offset_11.xml")),
+          success?: true
+        )
+      ]
+    end
+
     it "will automatically aggregate data from paginated responses" do
       paginating_task = "getRoleMembers"
       allow(subject).to receive(:request_raw)
@@ -206,6 +221,21 @@ RSpec.describe PopuliAPI::Connection do
       expect(enrollments[:response][:num_results]).to eq("13")
       expect(enrollments[:response][:enrollment].count).to eq(13)
       expect(enrollments[:response][:enrollment].last[:id]).to eq("13")
+    end
+
+    it "will correctly aggregate data from paginated responses using offset" do
+      paginating_task = "getApplications"
+      allow(subject).to receive(:request_raw)
+        .with(paginating_task, { offset: 0 })
+        .and_return(applications_responses[0])
+      allow(subject).to receive(:request_raw)
+        .with(paginating_task, { offset: 10 })
+        .and_return(applications_responses[1])
+
+      applications = subject.getApplications!
+      expect(applications[:response][:num_results]).to eq("11")
+      expect(applications[:response][:application].count).to eq(11)
+      expect(applications[:response][:application].last[:id]).to eq("11")
     end
 
     it "returns early if a request returns error" do
