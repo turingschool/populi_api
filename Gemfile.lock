@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     populi_api (0.8.0)
-      activesupport (>= 5.2, < 7.0)
+      activesupport (>= 5.2, < 8.0)
       faraday (>= 1.0, <= 2.0)
       faraday_middleware (~> 1.0)
       multi_xml (~> 0.6)
